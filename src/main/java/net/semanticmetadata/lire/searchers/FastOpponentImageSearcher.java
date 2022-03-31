@@ -46,7 +46,6 @@ import net.semanticmetadata.lire.imageanalysis.features.global.OpponentHistogram
 import net.semanticmetadata.lire.utils.ImageUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiBits;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.util.Bits;
 
@@ -107,7 +106,7 @@ public class FastOpponentImageSearcher extends AbstractImageSearcher {
         // clear result set ...
         docs.clear();
         // Needed for check whether the document is deleted.
-        Bits liveDocs = MultiBits.getLiveDocs(reader);
+        Bits liveDocs = MultiFields.getLiveDocs(reader);
         Document d;
         double tmpDistance;
         int docs = reader.numDocs();

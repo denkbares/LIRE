@@ -49,7 +49,6 @@ import net.semanticmetadata.lire.utils.FileUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.MultiBits;
 import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.IOContext;
@@ -216,7 +215,7 @@ public class TestSearching extends TestCase {
         GenericFastImageSearcher cvsurfsearcher = new GenericFastImageSearcher(5, localFeatureClass, aggregatorClass.newInstance(), 512, true, readerIndex, indexPath + ".config");
         GenericFastImageSearcher simpleceddcvsurfsearcher = new GenericFastImageSearcher(5, globalFeatureClass, keypointDetector, aggregatorClass.newInstance(), 512, true, readerIndex, indexPath + ".config");
 
-        Bits liveDocs = MultiBits.getLiveDocs(readerQueries);
+        Bits liveDocs = MultiFields.getLiveDocs(readerQueries);
 
         ImageSearchHits ceddhits, cvsurfhits, simpleceddcvsurfhits;
         Document queryDoc;
