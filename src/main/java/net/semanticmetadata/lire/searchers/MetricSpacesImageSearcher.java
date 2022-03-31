@@ -124,7 +124,7 @@ public class MetricSpacesImageSearcher extends AbstractImageSearcher {
             this.featureFieldName = feature.getFieldName();
             this.hashesFieldName = featureFieldName + DocumentBuilder.HASH_FIELD_SUFFIX;
             if (useDocValues) {
-                // docValues = MultiDocValues.getBinaryValues(reader, featureFieldName);
+                docValues = MultiDocValues.getBinaryValues(reader, featureFieldName);
                 searcher = new IndexSearcher(reader);
             }
         } catch (IOException e) {
@@ -179,7 +179,7 @@ public class MetricSpacesImageSearcher extends AbstractImageSearcher {
             this.featureFieldName = feature.getFieldName();
             this.hashesFieldName = featureFieldName + DocumentBuilder.HASH_FIELD_SUFFIX;
             if (useDocValues) {
-                // this.docValues = MultiDocValues.getBinaryValues(reader, featureFieldName);
+                this.docValues = MultiDocValues.getBinaryValues(reader, featureFieldName);
                 searcher = new IndexSearcher(reader);
             }
         } catch (IOException e) {
@@ -209,13 +209,11 @@ public class MetricSpacesImageSearcher extends AbstractImageSearcher {
             return null;
         }
         if (useDocValues) {
-            docValues = MultiDocValues.getBinaryValues(reader, featureFieldName);
             // find the id of the document in the reader, then do search ... TODO: find another way instead of calling the searcher every time.
             TopDocs topDocs = searcher.search(new TermQuery(new Term(DocumentBuilder.FIELD_NAME_IDENTIFIER, doc.get(DocumentBuilder.FIELD_NAME_IDENTIFIER))), 1);
             if (topDocs.totalHits > 0) {
                 int docID = topDocs.scoreDocs[0].doc;
-                docValues.advanceExact(docID);
-                queryFeature.setByteArrayRepresentation(docValues.binaryValue().bytes, docValues.binaryValue().offset, docValues.binaryValue().length);
+                queryFeature.setByteArrayRepresentation(docValues.get(docID).bytes, docValues.get(docID).offset, docValues.get(docID).length);
                 return search(MetricSpaces.generateBoostedQuery(queryFeature, numHashesUsedForQuery), queryFeature, searcher.getIndexReader());
             }
         } else {
@@ -294,12 +292,8 @@ public class MetricSpacesImageSearcher extends AbstractImageSearcher {
         TreeSet<SimpleResult> resultScoreDocs = new TreeSet<SimpleResult>();
         double maxDistance = -1d;
         double tmpScore;
-        // reset the iterator by getting the DocValueIterator again.
-        docValues = MultiDocValues.getBinaryValues(reader, featureFieldName);
         for (int i = 0; i < docs.scoreDocs.length; i++) {
-            // WARNING: if the documents are not ordered by id, this might just not work
-            docValues.advanceExact(i);
-            feature.setByteArrayRepresentation(docValues.binaryValue().bytes, docValues.binaryValue().offset, docValues.binaryValue().length);
+            feature.setByteArrayRepresentation(docValues.get(docs.scoreDocs[i].doc).bytes, docValues.get(docs.scoreDocs[i].doc).offset, docValues.get(docs.scoreDocs[i].doc).length);
             tmpScore = queryFeature.getDistance(feature);
             assert (tmpScore >= 0);
             if (resultScoreDocs.size() < maximumHits) {
